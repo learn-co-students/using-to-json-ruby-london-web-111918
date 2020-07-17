@@ -5,7 +5,17 @@ class PostsController < ApplicationController
     @posts = Post.all
   end
 
-  def show; end
+  # def show; end
+
+  def show
+    @post = Post.find(params[:id])
+    respond_to do |format|
+      format.html { render :show }
+      format.json { render json: @post.to_json(only: [:title, :description, :id],
+                              include: [author: { only: [:name]}]) }
+    end
+  end
+
 
   def new
     @post = Post.new
@@ -24,10 +34,37 @@ class PostsController < ApplicationController
     redirect_to post_path(@post)
   end
 
+
+  # return ONLY the REQUIRED data from json for main object and association
+  # Top-tip: Notice that we have to pass author: inside an array for include now that we are specifying additional options.
+
   def post_data
-    post = Post.find(params[:id])
-    render json: PostSerializer.serialize(post)
+   post = Post.find(params[:id])
+   #render json: PostSerializer.serialize(post)
+   render json: post.to_json(only: [:title, :description, :id],
+                             include: [ author: { only: [:name]}])
   end
+
+
+
+  # # render main object AND associations
+  # def post_data
+  #    post = Post.find(params[:id])
+  #    render json: post.to_json(include: :author)
+  #  end
+
+  # render only main object
+  # def post_data
+  #   post = Post.find(params[:id])
+  #   render json: post.to_json
+  # end
+
+
+
+  # def post_data
+  #   post = Post.find(params[:id])
+  #   render json: PostSerializer.serialize(post)
+  # end
 
   private
 
